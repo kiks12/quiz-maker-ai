@@ -4,9 +4,11 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework import status
+from ..quizai import GemmaAI
 
 
 class UploadViewSet(ViewSet):
+    gemma_ai = GemmaAI()
     parser_classes = (MultiPartParser, FormParser)
 
     def create(self, request):
@@ -25,10 +27,13 @@ class UploadViewSet(ViewSet):
                 full_text += page.get_text()
             doc.close()
 
+            created_quiz = self.gemma_ai.create_quiz(full_text)
+
             return Response(
                 {
                     "message": "File processed successfully.",
-                    "text": full_text
+                    "text": full_text,
+                    "created_quiz": created_quiz
                 }, status=status.HTTP_200_OK)
 
         except Exception as e:
