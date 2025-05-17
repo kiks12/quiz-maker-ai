@@ -1,0 +1,53 @@
+
+<div class="w-screen flex shadow-sm">
+  <div class="container mx-auto h-20 flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-medium">Quiz Maker App</h1>
+    </div>
+
+    <div>
+      <ul class="flex">
+        <li class="mx-2 hover:underline cursor-pointer">Home</li>
+        <li class="mx-2 hover:underline cursor-pointer">Profile</li>
+        <li class="mx-2 hover:underline cursor-pointer">Logout</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<main class="container mx-auto">
+  <div class="mt-10">
+    <form action="" class="mx-auto w-full md:w-1/2 shadow-md p-8 rounded-lg mt-4">
+      <label for="file">Upload file:</label>
+      <input id="file" type="file" class="p-4 border rounded-md w-full">
+
+      <div class="mt-4">
+        <h2 class="text-lg font-medium">Quiz Types</h2>
+        <div class="mt-2">
+          <input type="checkbox" name="multipleChoice" id="multipleChoice"/>
+          <label for="multipleChoice" class="ml-2">Multiple Choice</label>
+        </div>
+        <div class="mt-2">
+          <input type="checkbox" name="enumeration" id="enumeration"/>
+          <label for="enumeration" class="ml-2">Enumeration</label>
+        </div>
+        <div class="mt-2">
+          <input type="checkbox" name="identification" id="identification"/>
+          <label for="identification" class="ml-2">Identification</label>
+        </div>
+        <div class="mt-2">
+          <input type="checkbox" name="essayType" id="essayType"/>
+          <label for="essayType" class="ml-2">Essay Type</label>
+        </div>
+      </div>
+
+      <div class="mt-8">
+        <label for="numberOfItems">Number of Items:</label>
+        <input type="number" placeholder="Enter number of items..." name="numberOfItems" id="numberOfItems" class="w-full p-2 border border-neutral-300 rounded-sm"/>
+      </div>
+
+      <button class="w-full p-4 mt-8 bg-neutral-900 rounded-lg text-white">Generate Quiz</button>
+    </form>
+  </div>
+</main>
+
