@@ -15,7 +15,9 @@ class UploadViewSet(ViewSet):
         file_uploaded = request.FILES.get('file_uploaded')
 
         if not file_uploaded:
-            return Response({"error": "No File uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "error": "No File uploaded. "
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         # Process the file in memory (example: read lines or content)
         try:
