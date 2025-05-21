@@ -1,35 +1,51 @@
-from ollama import chat
-from ollama import ChatResponse
+import ollama
 from .regex import QUESTION_ANSWER_PATTERN, INSTRUCTION_PATTERN
 import re
 
 
+class Agent:
+    def __init__(self, role, model):
+        self.role = role
+        self.model = model
+
+    def generate(self, prompt):
+        return ollama.generate(
+            prompt=prompt,
+            system=self.role,
+            model=self.model,
+            stream=False
+        )["response"]
+
+
 class GemmaAI:
+    role = "You are a teacher, you create quizzes"
     model = "gemma3:1b"
-    role = "user"
 
     def __init__(self):
-        pass
+        self.agent = Agent(self.role, self.model)
 
-    def create_prompt(self, text: str, metadata: dict) -> str:
+    def create_quiz_type_prompt(self, metadata: dict):
         items_per_type = []
+
         if "items_per_type" in metadata:
             for (quiz_type, items) in metadata["items_per_type"].items():
                 items_per_type.append(f"{quiz_type} with {items} items")
 
-        return f'{text} \n\n I need a quiz based on the information above make sure that the questions are all about the text. The quiz should consist of {", ".join(items_per_type)}.  This is going to be the format of your response, give the instructions as "INSTRUCTIONS:", new line, then "QUESTION:" followed by its "ANSWER:" then repeat it. Do not ask about the goal of the text or something similar make sure that the questions are all about the data inside the text but do not refer to the "Text" as "Text".'
+        if len(items_per_type) > 0:
+            return f"The quiz should consist of {','.join(items_per_type)}."
+        return ""
+
+    def create_prompt(self, text: str, metadata: dict) -> str:
+        items_per_type = self.create_quiz_type_prompt(metadata)
+
+        return f'{text} \n\n I need a quiz based on the information above make sure that the questions are all about the text. {items_per_type} This is going to be the format of your response, give the instructions as "INSTRUCTIONS:", new line, then "QUESTION:", new line, new line, "CHOICES:" (if applicable), then "ANSWER:",  new line, new line, then repeat to question.'
 
     def create_quiz(self, text: str, metadata: dict) -> tuple:
         try:
             prompt = self.create_prompt(text, metadata)
-            response: ChatResponse = chat(model=self.model, messages=[
-                {
-                    'role': self.role,
-                    'content': prompt,
-                },
-            ])
-            print(response.message.content)
-            formatted_quiz = self.format_quiz(response.message.content)
+            response = self.agent.generate(prompt)
+            print(response)
+            formatted_quiz = self.format_quiz(response)
 
             return (prompt, formatted_quiz)
         except Exception as e:

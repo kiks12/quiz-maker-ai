@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework import status
 from ..quizai import GemmaAI
+from json.decoder import JSONDecodeError
 import json
 
 
@@ -17,7 +18,6 @@ class UploadViewSet(ViewSet):
     
     file: pdf-file
     metadata: JSON {
-        "quiz_types": ["multiple_choice", "true_or_false", "identification", "enumeration", "essay_type"],
         "items_per_type": {
             "multiple_choice": 5,
             "true_or_false": 5,
@@ -31,7 +31,7 @@ class UploadViewSet(ViewSet):
     def create(self, request):
         data = request.POST
         file = request.FILES.get('file')
-        metadata = json.loads(data["metadata"]) if "metadata" in data else {}
+        metadata = data["metadata"] if "metadata" in data else "{}"
 
         if not file:
             return Response({
@@ -39,9 +39,11 @@ class UploadViewSet(ViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            metadata = json.loads(metadata)
             full_text = self.read_text_from_pdf(file)
             prompt, created_quiz = self.gemma_ai.create_quiz(
-                full_text, metadata)
+                full_text, metadata
+            )
 
             return Response(
                 {
@@ -51,7 +53,6 @@ class UploadViewSet(ViewSet):
                     "prompt": prompt,
                     "created_quiz": created_quiz
                 }, status=status.HTTP_200_OK)
-
         except Exception as e:
             print(e)
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -60,9 +61,7 @@ class UploadViewSet(ViewSet):
         pdf_bytes = file.read()  # adjust decode if it's binary
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
-        full_text = ""
-        for page in doc:
-            full_text += page.get_text()
+        full_text = "".join([page.get_text() for page in doc])
         doc.close()
 
         return full_text
